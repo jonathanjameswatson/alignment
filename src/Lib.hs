@@ -48,8 +48,8 @@ make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
             diagonalCell = c ^? cellAt (i - 1) (j - 1)
         in  case (leftCell, upCell) of
               (Nothing, Nothing) -> Cell 0 Nothing
-              (Just _ , Nothing) -> Cell 0 (Just LeftDirection)
-              (Nothing, Just _ ) -> Cell 0 (Just UpDirection)
+              (Just _ , Nothing) -> Cell (-i) (Just LeftDirection)
+              (Nothing, Just _ ) -> Cell (-j) (Just UpDirection)
               (Just lc, Just uc) ->
                 let scores =
                       [ getScoreAndDirection lc
