@@ -116,7 +116,7 @@ trace m =
 
 run :: IO ()
 run = do
-  let m        = make "1234zxcv" "uiop1234" 1 1 1
+  let m        = make "zx12cv34" "iop1234" 1 1 1
   let (s1, s2) = trace m
   print $ tail s1
   print $ tail s2
