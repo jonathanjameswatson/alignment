@@ -14,6 +14,13 @@ module Matrix
   , make
   ) where
 
+import           AlignmentOptions               ( AlignmentOptions
+                                                , gapPenalty
+                                                , matchScore
+                                                , mismatchScore
+                                                , word1
+                                                , word2
+                                                )
 import           Control.Lens
 import           Data.Foldable                  ( maximumBy )
 import           Data.Maybe                     ( fromJust )
@@ -40,14 +47,11 @@ makeLenses ''Matrix
 cellAt :: Int -> Int -> Traversal' (Vector (Vector Cell)) Cell
 cellAt i j = ix j . ix i
 
-make :: String -> String -> Int -> Int -> Int -> Matrix
-make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
-  prefixedWord1
-  prefixedWord2
-  c
+make :: AlignmentOptions -> Matrix
+make alignmentOptions = Matrix prefixedWord1 prefixedWord2 c
  where
-  prefixedWord1 = '@' : word1
-  prefixedWord2 = '@' : word2
+  prefixedWord1 = '@' : alignmentOptions ^. word1
+  prefixedWord2 = '@' : alignmentOptions ^. word2
   makeCell :: Vector (Vector Cell) -> Int -> Int -> Cell
   makeCell c' i j =
     let leftCell     = c' ^? cellAt (i - 1) j
@@ -59,13 +63,16 @@ make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
           (Nothing, Just _ ) -> Cell (-j) (Just UpDirection)
           (Just lc, Just uc) ->
             let scores =
-                  [ (lc ^. score - orthogonalPenalty, LeftDirection)
-                  , (uc ^. score - orthogonalPenalty, UpDirection)
+                  [ ( lc ^. score - alignmentOptions ^. gapPenalty
+                    , LeftDirection
+                    )
+                  , (uc ^. score - alignmentOptions ^. gapPenalty, UpDirection)
                   , ( fromJust diagonalCell
                       ^. score
-                      +  (if prefixedWord1 ^? ix i == prefixedWord2 ^? ix j
+                      +  alignmentOptions
+                      ^. (if prefixedWord1 ^? ix i == prefixedWord2 ^? ix j
                            then matchScore
-                           else (-diagonalPenalty)
+                           else mismatchScore
                          )
                     , DiagonalDirection
                     )

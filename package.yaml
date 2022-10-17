@@ -24,6 +24,7 @@ dependencies:
 - lens >= 5
 - mtl
 - vector >= 0.12
+- optparse-applicative >= 0.16
 
 ghc-options:
 - -Wall
