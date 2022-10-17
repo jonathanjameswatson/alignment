@@ -1,20 +1,22 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Trace
-  ( trace
-  ) where
+  ( trace,
+  )
+where
 
-import           Control.Lens
-import           Control.Monad.State            ( State
-                                                , execState
-                                                )
-
-import           Matrix
+import Control.Lens
+import Control.Monad.State
+  ( State,
+    execState,
+  )
+import Matrix
 
 data Trace = Trace
-  { _result1, _result2 :: String
-  , _posI, _posJ       :: Int
+  { _result1, _result2 :: String,
+    _posI, _posJ :: Int
   }
+
 makeLenses ''Trace
 
 appendToResults :: Char -> Char -> State Trace ()
@@ -28,7 +30,7 @@ trace' m = do
   j <- use posJ
   case m ^. cells ^?! cellAt i j ^. direction of
     Nothing -> return ()
-    Just d  -> do
+    Just d -> do
       case d of
         LeftDirection -> do
           posI %= pred
@@ -44,11 +46,13 @@ trace' m = do
 
 trace :: Matrix -> (String, String)
 trace m =
-  let result = execState
-        (trace' m)
-        (Trace ""
-               ""
-               (m ^. w1 . to length . to pred)
-               (m ^. w2 . to length . to pred)
-        )
-  in  (result ^. result1, result ^. result2)
+  let result =
+        execState
+          (trace' m)
+          ( Trace
+              ""
+              ""
+              (m ^. w1 . to length . to pred)
+              (m ^. w2 . to length . to pred)
+          )
+   in (result ^. result1, result ^. result2)
