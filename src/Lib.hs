@@ -31,9 +31,6 @@ makeLenses ''Matrix
 cellAt :: Int -> Int -> Traversal' [[Cell]] Cell
 cellAt i j = ix j . ix i
 
-getScoreAndDirection :: Cell -> Int -> Direction -> (Int, Maybe Direction)
-getScoreAndDirection c x d = (c ^. score + x, Just d)
-
 make :: String -> String -> Int -> Int -> Int -> Matrix
 make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
   prefixedWord1
@@ -52,20 +49,19 @@ make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
               (Nothing, Just _ ) -> Cell (-j) (Just UpDirection)
               (Just lc, Just uc) ->
                 let scores =
-                      [ getScoreAndDirection lc
-                                             (-orthogonalPenalty)
-                                             LeftDirection
-                      , getScoreAndDirection uc (-orthogonalPenalty) UpDirection
-                      , getScoreAndDirection
-                        (fromJust diagonalCell)
-                        (if prefixedWord1 ^? ix i == prefixedWord2 ^? ix j
-                          then matchScore
-                          else (-diagonalPenalty)
+                      [ (lc ^. score - orthogonalPenalty, LeftDirection)
+                      , (uc ^. score - orthogonalPenalty, UpDirection)
+                      , ( fromJust diagonalCell
+                          ^. score
+                          +  (if prefixedWord1 ^? ix i == prefixedWord2 ^? ix j
+                               then matchScore
+                               else (-diagonalPenalty)
+                             )
+                        , DiagonalDirection
                         )
-                        DiagonalDirection
                       ]
-                    (maxScore, d) = maximumBy (comparing (^. _1)) scores
-                in  Cell maxScore d
+                    (maxScore, d) = maximumBy (comparing fst) scores
+                in  Cell maxScore (Just d)
       | i <- [0 .. length prefixedWord1 - 1]
       ]
     | j <- [0 .. length prefixedWord2 - 1]
