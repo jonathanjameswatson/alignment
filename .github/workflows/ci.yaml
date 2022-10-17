@@ -1,4 +1,4 @@
-name: Ormolu
+name: CI
 on: push
 jobs:
   ormolu:
