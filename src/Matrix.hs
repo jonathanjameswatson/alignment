@@ -18,6 +18,8 @@ import           Control.Lens
 import           Data.Foldable                  ( maximumBy )
 import           Data.Maybe                     ( fromJust )
 import           Data.Ord                       ( comparing )
+import qualified Data.Vector                   as V
+import           Data.Vector                    ( Vector )
 
 data Direction = DiagonalDirection | UpDirection | LeftDirection deriving (Show)
 
@@ -30,12 +32,12 @@ makeLenses ''Cell
 
 data Matrix = Matrix
   { _w1, _w2 :: String
-  , _cells   :: [[Cell]]
+  , _cells   :: Vector (Vector Cell)
   }
   deriving Show
 makeLenses ''Matrix
 
-cellAt :: Int -> Int -> Traversal' [[Cell]] Cell
+cellAt :: Int -> Int -> Traversal' (Vector (Vector Cell)) Cell
 cellAt i j = ix j . ix i
 
 make :: String -> String -> Int -> Int -> Int -> Matrix
@@ -46,7 +48,7 @@ make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
  where
   prefixedWord1 = '@' : word1
   prefixedWord2 = '@' : word2
-  makeCell :: [[Cell]] -> Int -> Int -> Cell
+  makeCell :: Vector (Vector Cell) -> Int -> Int -> Cell
   makeCell c' i j =
     let leftCell     = c' ^? cellAt (i - 1) j
         upCell       = c' ^? cellAt i (j - 1)
@@ -71,6 +73,8 @@ make word1 word2 orthogonalPenalty diagonalPenalty matchScore = Matrix
                 (maxScore, d) = maximumBy (comparing fst) scores
             in  Cell maxScore (Just d)
   c =
-    [ [ makeCell c i j | i <- [0 .. length prefixedWord1 - 1] ]
-    | j <- [0 .. length prefixedWord2 - 1]
-    ]
+    V.map
+        (\j -> V.map (\i -> makeCell c i j)
+          $ V.fromList [0 .. length prefixedWord1]
+        )
+      $ V.fromList [0 .. length prefixedWord2]

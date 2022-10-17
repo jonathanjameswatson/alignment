@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - lens >= 5
 - mtl
+- vector >= 0.12
 
 ghc-options:
 - -Wall
