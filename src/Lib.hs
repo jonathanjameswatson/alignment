@@ -88,7 +88,7 @@ traceCurrentCell m = do
   i <- use posI
   j <- use posJ
   case m ^. cells ^?! cellAt i j ^. direction of
-    Nothing -> appendToResults (m ^. w1 ^?! ix i) (m ^. w2 ^?! ix j)
+    Nothing -> return ()
     Just d  -> do
       case d of
         LeftDirection -> do
@@ -118,5 +118,5 @@ run :: IO ()
 run = do
   let m        = make "zx12cv34" "iop1234" 1 1 1
   let (s1, s2) = trace m
-  print $ tail s1
-  print $ tail s2
+  print s1
+  print s2
