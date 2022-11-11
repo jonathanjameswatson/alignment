@@ -63,8 +63,8 @@ make alignmentOptions = Matrix prefixedWord1 prefixedWord2 c
           diagonalCell = c' ^? cellAt (i - 1) (j - 1)
        in case (leftCell, upCell) of
             (Nothing, Nothing) -> Cell 0 Nothing
-            (Just _, Nothing) -> Cell (-i) (Just LeftDirection)
-            (Nothing, Just _) -> Cell (-j) (Just UpDirection)
+            (Just _, Nothing) -> Cell (-i * alignmentOptions ^. gapPenalty) (Just LeftDirection)
+            (Nothing, Just _) -> Cell (-j * alignmentOptions ^. gapPenalty) (Just UpDirection)
             (Just lc, Just uc) ->
               let scores =
                     [ ( lc ^. score - alignmentOptions ^. gapPenalty,
